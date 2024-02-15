@@ -6,4 +6,6 @@ class AppString {
       'Pedestrian Status not available';
   static const String stepCountNotAvailable = 'Step Count not available';
   static const String pleaseWalk = 'Please walk :';
+  static const String step = 'Step : ';
+  static const String time = 'Time : ';
 }

@@ -3,6 +3,9 @@ import 'package:get/get.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:step_counter_demo_flutter/config/app_string.dart';
 import 'package:step_counter_demo_flutter/controller/pedometer_controller.dart';
+import 'package:step_counter_demo_flutter/main.dart';
+
+import '../model/step_counter_model.dart';
 
 PedometerController controller = Get.put(PedometerController());
 
@@ -16,7 +19,8 @@ class PedometerScreen extends StatefulWidget {
 class _PedometerScreenState extends State<PedometerScreen> {
   Stream<StepCount>? _stepCountStream;
   Stream<PedestrianStatus>? _pedestrianStatusStream;
-  String _status = '?', _steps = '?';
+  String _status = '-', _steps = '-';
+  List<StepCounterModel> record = <StepCounterModel>[];
 
   @override
   void initState() {
@@ -28,7 +32,6 @@ class _PedometerScreenState extends State<PedometerScreen> {
     setState(() {
       _steps = event.steps.toString();
       controller.steps.value = _steps;
-      controller.timeStamp.value = event.timeStamp.toString();
     });
   }
 
@@ -64,68 +67,104 @@ class _PedometerScreenState extends State<PedometerScreen> {
     if (!mounted) return;
   }
 
+  getStoreData() async {
+    record = await helper.getStep();
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
+    getStoreData();
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.blue,
-          title: const Text(AppString.stepCounter),
-        ),
-        body: Column(
-          children: [
-            const SizedBox(
-              height: 20,
+      appBar: AppBar(
+        backgroundColor: Colors.blue,
+        title: const Text(AppString.stepCounter),
+      ),
+      body: Column(
+        children: [
+          const SizedBox(
+            height: 20,
+          ),
+          const Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              AppString.pleaseWalk,
+              style: TextStyle(fontSize: 20),
             ),
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                AppString.pleaseWalk,
-                style: TextStyle(fontSize: 20),
-              ),
-            ),
-            Center(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: <Widget>[
-                    const SizedBox(
-                      height: 30,
-                    ),
-                    const Text(
-                      AppString.stepTaken,
-                      style: TextStyle(fontSize: 24),
-                    ),
-                    Text(
-                      _steps,
-                      style: const TextStyle(fontSize: 20),
-                    ),
-                    const SizedBox(
-                      height: 40,
-                    ),
-                    const Text(
-                      AppString.pedestrianStatus,
-                      style: TextStyle(fontSize: 24),
-                    ),
-                    Icon(
-                      _status == 'walking'
-                          ? Icons.directions_walk
-                          : _status == 'stopped'
-                              ? Icons.accessibility_new
-                              : Icons.error,
-                      size: 50,
-                    ),
-                    Center(
-                      child: Text(
-                        _status,
-                        style: _status == 'walking' || _status == 'stopped'
-                            ? const TextStyle(fontSize: 20)
-                            : const TextStyle(fontSize: 20, color: Colors.red),
-                      ),
-                    )
-                  ],
+          ),
+          Center(
+            child: Column(
+              children: <Widget>[
+                const SizedBox(
+                  height: 30,
                 ),
-              ),
+                const Text(
+                  AppString.stepTaken,
+                  style: TextStyle(fontSize: 24),
+                ),
+                Text(
+                  _steps,
+                  style: const TextStyle(fontSize: 20),
+                ),
+                const SizedBox(
+                  height: 40,
+                ),
+                const Text(
+                  AppString.pedestrianStatus,
+                  style: TextStyle(fontSize: 24),
+                ),
+                Icon(
+                  _status == 'walking'
+                      ? Icons.directions_walk
+                      : _status == 'stopped'
+                          ? Icons.accessibility_new
+                          : Icons.error,
+                  size: 50,
+                ),
+                Center(
+                  child: Text(
+                    _status,
+                    style: _status == 'walking' || _status == 'stopped'
+                        ? const TextStyle(fontSize: 20)
+                        : const TextStyle(fontSize: 20, color: Colors.red),
+                  ),
+                )
+              ],
             ),
-          ],
-        ));
+          ),
+          Expanded(
+            child: ListView.builder(
+                physics: const ScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: record.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            const Text(AppString.step),
+                            Text(record[index].step == "-" ||
+                                    record[index].step == "?"
+                                ? "0"
+                                : record[index].step),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            const Text(AppString.time),
+                            Text(record[index].time),
+                          ],
+                        )
+                      ],
+                    ),
+                  );
+                }),
+          ),
+        ],
+      ),
+    );
   }
 }
