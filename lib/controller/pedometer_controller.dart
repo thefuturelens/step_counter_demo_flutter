@@ -11,7 +11,7 @@ class PedometerController extends GetxController {
 
   @override
   void onInit() {
-    initPlatformState();
+    // initPlatformState();
     super.onInit();
   }
 
