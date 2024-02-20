@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:step_counter_demo_flutter/config/app_string.dart';
-import 'package:step_counter_demo_flutter/controller/pedometer_controller.dart';
 import 'package:step_counter_demo_flutter/main.dart';
 
 import '../model/step_counter_model.dart';
-
-PedometerController controller = Get.put(PedometerController());
 
 class PedometerScreen extends StatefulWidget {
   const PedometerScreen({Key? key}) : super(key: key);
@@ -28,10 +24,9 @@ class _PedometerScreenState extends State<PedometerScreen> {
     initPlatformState();
   }
 
-  void onStepCount(StepCount event) {
+  void onStepCount(StepCount event){
     setState(() {
       _steps = event.steps.toString();
-      controller.steps.value = _steps;
     });
   }
 
@@ -84,13 +79,6 @@ class _PedometerScreenState extends State<PedometerScreen> {
         children: [
           const SizedBox(
             height: 20,
-          ),
-          const Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              AppString.pleaseWalk,
-              style: TextStyle(fontSize: 20),
-            ),
           ),
           Center(
             child: Column(

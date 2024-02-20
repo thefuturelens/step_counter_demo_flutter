@@ -4,10 +4,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:pedometer/pedometer.dart';
+
 import 'package:permission_handler/permission_handler.dart';
 import 'package:step_counter_demo_flutter/sqflite/sqflite.dart';
+import 'package:step_counter_demo_flutter/views/pedometer_screen.dart';
 import 'model/step_counter_model.dart';
-import 'views/pedometer_screen.dart';
+
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 
 final SqfliteHelper helper = SqfliteHelper();
@@ -15,6 +18,8 @@ final SqfliteHelper helper = SqfliteHelper();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Permission.activityRecognition.request();
+  await Permission.microphone.request();
+  await Permission.location.request();
   helper.initDB();
   await Permission.notification.isDenied.then((value) async {
     if (value) {
@@ -79,33 +84,35 @@ void onStart(ServiceInstance service) async {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  Timer.periodic(const Duration(minutes: 2), (timer) async {
+  Timer.periodic(const Duration(minutes:2), (timer) async {
     if (service is AndroidServiceInstance) {
       if (await service.isForegroundService()) {
         try {
-          var stepC = StepCounterModel(
-            step: controller.steps.value,
-            time: DateTime.now().toString(),
-          );
-          helper.insertStep(stepC);
+          Pedometer.stepCountStream.listen((event) {
+            var stepC = StepCounterModel(
+              step: event.steps.toString(),
+              time: DateTime.now().toString(),
+            );
+            helper.insertStep(stepC);
+            flutterLocalNotificationsPlugin.show(
+              notificationId,
+              'Step Counter',
+              'Step ${event.steps.toString()}, Time ${DateTime.now().toString()}',
+              const NotificationDetails(
+                android: AndroidNotificationDetails(
+                  notificationChannelId,
+                  'MY FOREGROUND SERVICE',
+                  // icon: 'ic_bg_service_small',
+                  ongoing: true,
+                ),
+              ),
+            );
+          });
         } catch (e) {
           if (kDebugMode) {
             print(e);
           }
         } finally {}
-        flutterLocalNotificationsPlugin.show(
-          notificationId,
-          'Step Counter',
-          'Step ${controller.steps.value}, Time ${DateTime.now().toString()}',
-          const NotificationDetails(
-            android: AndroidNotificationDetails(
-              notificationChannelId,
-              'MY FOREGROUND SERVICE',
-              // icon: 'ic_bg_service_small',
-              ongoing: true,
-            ),
-          ),
-        );
       }
     }
   });
@@ -122,7 +129,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: PedometerScreen(),
+      home: const PedometerScreen(),
     );
   }
 }
