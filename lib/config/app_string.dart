@@ -8,4 +8,9 @@ class AppString {
   static const String pleaseWalk = 'Please walk :';
   static const String step = 'Step : ';
   static const String time = 'Time : ';
+  static const String heartBeat = 'HeartBeat : ';
+  static const String stopMeasurement = 'Stop';
+  static const String measureBPM = 'Measure BPM';
+  static const String bpmValue = 'bpmValue';
+  static const String estimatedBPM = 'Estimated BPM';
 }

@@ -1,11 +1,17 @@
 import 'package:get/get.dart';
+import 'package:heart_bpm/heart_bpm.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:step_counter_demo_flutter/config/app_string.dart';
+import '../model/step_counter_model.dart';
 
 class PedometerController extends GetxController {
   Rx<Stream<StepCount>>? stepCountStream;
   Rx<Stream<PedestrianStatus>>? pedestrianStatusStream;
   RxString status = '-'.obs, steps = '-'.obs;
+  RxList<StepCounterModel> record = <StepCounterModel>[].obs;
+  RxList<SensorValue> data = <SensorValue>[].obs;
+  RxBool isBPMEnabled = false.obs;
+  RxInt bpmValue = 0.obs;
 
   @override
   void onInit() {
@@ -48,7 +54,11 @@ class PedometerController extends GetxController {
 
     stepCountStream?.value = Pedometer.stepCountStream;
     stepCountStream?.value.listen(onStepCount).onError(onStepCountError);
-    update();
+
     // if (!mounted) return;
+  }
+
+  updateMethod() {
+    update();
   }
 }

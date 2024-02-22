@@ -20,7 +20,7 @@ class SqfliteHelper {
       version: 1,
       onCreate: (db, version) {
         return db.execute(
-          'CREATE TABLE stepCounter(id INTEGER PRIMARY KEY AUTOINCREMENT, step TEXT, time TEXT)',
+          'CREATE TABLE stepCounter(id INTEGER PRIMARY KEY AUTOINCREMENT, step TEXT, time TEXT, heartBeat TEXT)',
         );
       },
     );
@@ -47,6 +47,7 @@ class SqfliteHelper {
         id: steps[i]['id'],
         step: steps[i]['step'],
         time: steps[i]['time'],
+        heartBeat: steps[i]['heartBeat'],
       );
     });
   }

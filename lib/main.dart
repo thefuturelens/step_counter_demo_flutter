@@ -4,13 +4,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:get/get.dart';
 import 'package:pedometer/pedometer.dart';
-
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:step_counter_demo_flutter/controller/pedometer_controller.dart';
 import 'package:step_counter_demo_flutter/sqflite/sqflite.dart';
 import 'package:step_counter_demo_flutter/views/pedometer_screen.dart';
 import 'model/step_counter_model.dart';
-
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 
 final SqfliteHelper helper = SqfliteHelper();
@@ -20,6 +21,7 @@ void main() async {
   await Permission.activityRecognition.request();
   await Permission.microphone.request();
   await Permission.location.request();
+  await Permission.camera.request();
   helper.initDB();
   await Permission.notification.isDenied.then((value) async {
     if (value) {
@@ -33,6 +35,7 @@ void main() async {
 
 const notificationChannelId = 'my_foreground';
 const notificationId = 888;
+
 Future<void> initializeService() async {
   final service = FlutterBackgroundService();
 
@@ -84,20 +87,25 @@ void onStart(ServiceInstance service) async {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  Timer.periodic(const Duration(minutes:2), (timer) async {
+  Timer.periodic(const Duration(minutes: 2), (timer) async {
     if (service is AndroidServiceInstance) {
       if (await service.isForegroundService()) {
         try {
+          SharedPreferences preferences = await SharedPreferences.getInstance();
+          await preferences.reload();
+          final bpmVal = preferences.getString('heart_rate') ?? "";
+
           Pedometer.stepCountStream.listen((event) {
             var stepC = StepCounterModel(
               step: event.steps.toString(),
               time: DateTime.now().toString(),
+              heartBeat: bpmVal,
             );
             helper.insertStep(stepC);
             flutterLocalNotificationsPlugin.show(
               notificationId,
               'Step Counter',
-              'Step ${event.steps.toString()}, Time ${DateTime.now().toString()}',
+              'Step ${event.steps.toString()}, Time ${DateTime.now().toString()}, HeartBeat $bpmVal',
               const NotificationDetails(
                 android: AndroidNotificationDetails(
                   notificationChannelId,
