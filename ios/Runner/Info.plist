@@ -28,6 +28,18 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<key>UIBackgroundModes</key>
+    <array>
+    	<string>processing</string>
+    </array>
+    <key>BGTaskSchedulerPermittedIdentifiers</key>
+    	<array>
+    		<string>task-identifier</string>
+      </array>
+    <key>UIBackgroundModes</key>
+    <array>
+    	<string>fetch</string>
+    </array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
